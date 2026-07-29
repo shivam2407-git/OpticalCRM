@@ -2,10 +2,19 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 from pdf_generator import generate_pdf
+import os
+import sys
 
 # ==========================
 # PAGE SETTINGS
 # ==========================
+def resource_path(relative_path):
+    if getattr(sys, "frozen", False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, relative_path)
 
 st.set_page_config(page_title="Optical CRM", page_icon="👓", layout="wide")
 
@@ -13,8 +22,9 @@ st.set_page_config(page_title="Optical CRM", page_icon="👓", layout="wide")
 # DATABASE
 # ==========================
 
-conn = sqlite3.connect("optical_store.db", check_same_thread=False)
+DB_PATH = resource_path("optical_store.db")
 
+conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 
 cursor.execute("""
@@ -378,8 +388,7 @@ elif menu == "All Customers":
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
-    with open("optical_store.db", "rb") as file:
-
+    with open(DB_PATH, "rb") as file:
         st.download_button(
             label="📁 Download Database Backup",
             data=file,

@@ -1,18 +1,20 @@
-name: Build OpticalCRM Windows EXE
+name: Build OpticalCRM
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build:
+
     runs-on: windows-latest
 
     steps:
+
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -22,18 +24,12 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build EXE
+      - name: Build
         run: |
-          pyinstaller ^
-            --onedir ^
-            --windowed ^
-            --name OpticalCRM ^
-            --icon logo.ico ^
-            --add-data "optical_store.db;." ^
-            app.py
+          pyinstaller OpticalCRM.spec
 
-      - name: Upload EXE
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: OpticalCRM-Windows
+          name: OpticalCRM
           path: dist/OpticalCRM
