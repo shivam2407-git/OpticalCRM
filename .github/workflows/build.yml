@@ -1,10 +1,9 @@
-name: Build OpticalCRM
+name: Build OpticalCRM (Nuitka)
 
 on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 jobs:
@@ -12,40 +11,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Upgrade pip
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-
-      - name: Install Dependencies
-        run: |
           pip install -r requirements.txt
 
-      - name: Verify Installation
+      - name: Build with Nuitka
         run: |
-          python --version
-          pip list
+          python -m nuitka ^
+            --standalone ^
+            --onefile ^
+            --enable-plugin=tk-inter ^
+            --include-data-file=app.py=app.py ^
+            --include-data-file=pdf_generator.py=pdf_generator.py ^
+            --include-data-file=optical_store.db=optical_store.db ^
+            --include-data-file=logo.ico=logo.ico ^
+            launcher.py
 
-      - name: Build OpticalCRM
-        run: |
-          pyinstaller --clean --noconfirm OpticalCRM.spec
-
-      - name: Show Build Output
-        run: |
-          dir dist
-          dir dist\OpticalCRM
-
-      - name: Upload OpticalCRM
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: OpticalCRM
-          path: dist/OpticalCRM
-          if-no-files-found: error
-          retention-days: 7
+          path: "*.exe"

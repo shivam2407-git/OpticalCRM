@@ -1,16 +1,15 @@
 import os
 import sys
+import threading
 import time
 import socket
-import threading
-import subprocess
 import webbrowser
+from streamlit.web import cli as stcli
 
 
 def resource_path(relative_path):
-    """Get absolute path to bundled resource."""
     if getattr(sys, "frozen", False):
-        base_path = sys._MEIPASS
+        base_path = os.path.dirname(sys.executable)
     else:
         base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
@@ -21,8 +20,8 @@ def wait_for_server(host="127.0.0.1", port=8501, timeout=60):
 
     while time.time() - start < timeout:
         try:
-            with socket.create_connection((host, port), timeout=1):
-                return True
+            socket.create_connection((host, port), timeout=1).close()
+            return True
         except OSError:
             time.sleep(0.5)
 
@@ -32,17 +31,16 @@ def wait_for_server(host="127.0.0.1", port=8501, timeout=60):
 def start_streamlit():
     app = resource_path("app.py")
 
-    subprocess.Popen(
-        [
-            "streamlit",
-            "run",
-            app,
-            "--server.headless=true",
-            "--server.port=8501",
-            "--browser.gatherUsageStats=false",
-        ],
-        creationflags=subprocess.CREATE_NO_WINDOW,
-    )
+    sys.argv = [
+        "streamlit",
+        "run",
+        app,
+        "--server.headless=true",
+        "--server.port=8501",
+        "--browser.gatherUsageStats=false",
+    ]
+
+    stcli.main()
 
 
 if __name__ == "__main__":

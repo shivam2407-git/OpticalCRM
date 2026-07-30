@@ -7,4 +7,6 @@ Pillow
 requests
 GitPython
 watchdog
-pyinstaller
+nuitka
+ordered-set
+zstandard
